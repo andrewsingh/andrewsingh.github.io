@@ -1,8 +1,9 @@
 ---
 layout: post
 title: "Text, Not Tracks: Building Music Similarity Search Without Audio or User Data"
+date: 2025-10-14 00:00:00 -0800
+categories: [Machine Learning, Information Retrieval]
 tags: [llm, embeddings, recsys, search]
-# (optional) description, image, etc.
 ---
 
 <!-- mathjax for this post only -->
