@@ -7,23 +7,10 @@ theme = "PaperMod"
   description = "Personal blog for machine learning projects"
   author = "Andrew Singh"
 
-  # Profile mode (home page)
-  [params.profileMode]
-    enabled = true
-    title = "👋 Welcome"
-    subtitle = "Hi, I'm Andrew. I'm a machine learning engineer interested in natural language processing, information retrieval, and recommender systems."
-
-    [[params.profileMode.buttons]]
-      name = "Posts"
-      url = "/posts"
-
-    [[params.profileMode.buttons]]
-      name = "Archive"
-      url = "/archives"
-
-    [[params.profileMode.buttons]]
-      name = "Tags"
-      url = "/tags"
+  # Home info (displayed at top of homepage)
+  [params.homeInfoParams]
+    Title = "👋 Welcome to Andrew's Blog"
+    Content = "Hi, I'm Andrew. I'm a machine learning engineer interested in natural language processing, information retrieval, and recommender systems."
 
   # Social icons
   [[params.socialIcons]]
@@ -55,40 +42,12 @@ theme = "PaperMod"
   showtoc = true
   tocopen = false
 
-  # Search
-  [params.fuseOpts]
-    isCaseSensitive = false
-    shouldSort = true
-    location = 0
-    distance = 1000
-    threshold = 0.4
-    minMatchCharLength = 0
-    keys = ["title", "permalink", "summary", "content"]
-
 # Menu
 [[menu.main]]
   identifier = "posts"
   name = "Posts"
   url = "/posts/"
   weight = 10
-
-[[menu.main]]
-  identifier = "archives"
-  name = "Archive"
-  url = "/archives/"
-  weight = 20
-
-[[menu.main]]
-  identifier = "search"
-  name = "Search"
-  url = "/search/"
-  weight = 30
-
-[[menu.main]]
-  identifier = "tags"
-  name = "Tags"
-  url = "/tags/"
-  weight = 40
 
 # Outputs
 [outputs]
