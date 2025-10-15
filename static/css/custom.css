@@ -1,55 +1,72 @@
 /* Custom font size overrides */
 
-/* Reduce post content font size */
-.post-content {
-    font-size: 14px;
+/* Override body font size */
+body {
+    font-size: 16px !important;
 }
 
-/* Reduce heading sizes */
-.post-content h1 {
-    font-size: 1.6rem;
+/* Set post content font size */
+.post-content,
+article.post-single .post-content,
+.post-single .post-content {
+    font-size: 16px !important;
 }
 
-.post-content h2 {
-    font-size: 1.3rem;
+/* Set heading sizes */
+.post-content h1,
+article.post-single h1 {
+    font-size: 1.75rem !important;
 }
 
-.post-content h3 {
-    font-size: 1.15rem;
+.post-content h2,
+article.post-single h2 {
+    font-size: 1.4rem !important;
 }
 
-.post-content h4 {
-    font-size: 1rem;
+.post-content h3,
+article.post-single h3 {
+    font-size: 1.2rem !important;
 }
 
-.post-content h5 {
-    font-size: 0.9rem;
+.post-content h4,
+article.post-single h4 {
+    font-size: 1.05rem !important;
 }
 
-.post-content h6 {
-    font-size: 0.85rem;
+.post-content h5,
+article.post-single h5 {
+    font-size: 0.95rem !important;
 }
 
-/* Reduce paragraph and list text */
+.post-content h6,
+article.post-single h6 {
+    font-size: 0.9rem !important;
+}
+
+/* Set paragraph and list text */
 .post-content p,
-.post-content li {
-    font-size: 14px;
+.post-content li,
+article.post-single p,
+article.post-single li {
+    font-size: 16px !important;
 }
 
-/* Reduce code block font size */
+/* Set code block font size */
 .post-content pre,
-.post-content code {
-    font-size: 13px;
+.post-content code,
+article.post-single pre,
+article.post-single code {
+    font-size: 14px !important;
 }
 
 /* Make code blocks wrap instead of scroll */
 .post-content pre {
-    white-space: pre-wrap;
-    word-wrap: break-word;
-    overflow-x: visible;
+    white-space: pre-wrap !important;
+    word-wrap: break-word !important;
+    overflow-x: visible !important;
 }
 
 .post-content pre code {
-    white-space: pre-wrap;
-    word-wrap: break-word;
+    white-space: pre-wrap !important;
+    word-wrap: break-word !important;
 }

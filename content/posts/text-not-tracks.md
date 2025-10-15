@@ -2,22 +2,13 @@
 title: "Text, Not Tracks: Building Music Similarity Search Without Audio or User Data"
 date: 2025-10-14T00:00:00-08:00
 draft: false
-categories:
-  - Machine Learning
-  - Information Retrieval
-tags:
-  - llm
-  - embeddings
-  - recsys
-  - search
 math: true
 ShowToc: true
 TocOpen: false
 ---
 
-# Demo
-
-Try the search engine here: https://songmatch.up.railway.app
+# Try It Out
+Try out the search engine here: https://songmatch.up.railway.app
 
 | Requirements           | Features                                    |
 | ---------------------- | ------------------------------------------- |
@@ -26,7 +17,6 @@ Try the search engine here: https://songmatch.up.railway.app
 | Spotify Premium acount | Stream song results directly in the web app |
 
 # Code
-
 **Music Similarity Search**: https://github.com/andrewsingh/semantic-song-search
 
 **Song Search Arena**: https://github.com/andrewsingh/song-search-arena
@@ -35,7 +25,7 @@ Try the search engine here: https://songmatch.up.railway.app
 
 I’ve been streaming music on Spotify for years. In the early days, finding music to listen to was easy, as I had very little music exposure. There was a seemingly endless amount of new good music to discover. 
 
-As time went on and my music taste matured, I began finding it more difficult to quickly find music to play. The popular public playlists weren't a great fit for me; I tried out Spotify’s personalized playlists, but those all too often either chose songs that I’ve already been listening to a lot, or were songs that didn't match the vibe I was going for. 
+As time went on and my music taste matured, I began finding it more difficult to quickly find music to play. The popular public playlists weren't a great fit for me; I tried out Spotify’s personalized playlists, but those all too often either chose songs that I’ve already been listening to a lot, or were songs that didn't match the vibe I was going for. I'd occasionally make my own playlist, but then I'd end up relying on it so often that I'd soon grow bored of it and have to make a new one.
 
 I wanted a simple, reliable way to open a streaming app and immediately start playing music that I wanted to listen to. But what does "what I want to listen to" mean exactly? My experience often fell into one of two cases:
 - I can't put the vibe I'm going for into words, but if I heard a song that matches it, I'd immediately know it. I then want to find other songs that are similar to that song, that evoke the same listening experience. This motivates the **song-to-song search** problem: given a query song, retrieve the most similar songs to the query song.
@@ -43,9 +33,10 @@ I wanted a simple, reliable way to open a streaming app and immediately start pl
 
 I wanted to build these two types of similarity search over my library of songs, but there was one glaring problem: I didn't have any data. I’m just an end user - I don’t have access to the files of songs that I stream, nor do I have Spotify’s vast amounts of user streaming history that could be exploited for collaborative filtering. Building something to solve my music problem seemed impossible.
 
-Then an idea occurred to me: what if I don’t need the songs at all? What if I could just collect  information about the songs and artists from the internet, organize that information into structured profiles, and use these profiles as my representation of the song instead? Would this be enough to build a similarity search engine that actually works well for my two search problems?
+At some point as I was exploring this space, a thought came to me: *what if I don’t need the songs at all?* What if I could just collect  information about the songs and artists from the internet, organize that information into structured profiles, and use these profiles as my representation of the song instead? Would this be enough to build a similarity search engine that actually works well for my two search problems?
 
-It turns out that being constrained to represent songs through text instead of the original audio can actually be a feature, not a bug. 
+It turns out that being constrained to represent songs through text instead of the original audio can actually be a *feature*, not a bug. Representing songs through text allows the representation to capture higher-level semantic features of the song rather than low-level audio features, which often prove more useful for real-world use cases of song-based or text-based similarity search.
+
 ### What’s Inside
 This post presents a method for building a music similarity search engine purely from internet text data. The search engine performs two types of search tasks:
 1. **Song-to-song** search, where the query is a song and the goal is to retrieve the most similar songs to the query song
@@ -53,7 +44,7 @@ This post presents a method for building a music similarity search engine purely
 
 The core idea of the method is building structured text profiles of tracks and artists, then creating dense representations of these profiles to power embedding-based similarity search. 
 
-This post also includes a head-to-head evaluation against the current state of the art audio-text model, CLaMP 3 ([Wu et al. 2025](https://arxiv.org/abs/2502.10362)), on a limited library of music for which we have access to the original audio. Our method achieves a **72% win-rate** and a 64.5% confidence-weighted win rate against CLaMP 3, *without using any of the original audio content or user streaming data*.
+This post also includes a head-to-head evaluation against the current state of the art audio-text model, CLaMP 3 ([Wu et al. 2025](https://arxiv.org/abs/2502.10362)), on a limited library of music for which we have access to the original audio. Our method achieves a **72% win-rate** and a 64.5% confidence-weighted win rate against CLaMP 3, *without using any audio content or user streaming data*.
 
 In addition, this post presents [Song Search Arena](https://github.com/andrewsingh/song-search-arena/tree/main), a lightweight web app to facilitate conducting blinded, pairwise preference evaluations between music retrieval systems. The arena is model-agnostic, supports both song queries and text queries, and automatically computes analysis metrics such as win rates and Wilson Confidence Intervals.
   
@@ -136,20 +127,20 @@ Now that we have the complete text profiles, we need to obtain dense representat
 - It allows each embedding to represent an individual aspect of the track, retaining more information compared to trying to fit all aspects into a single embedding. This allows the profile to be more faithfully represented in embedding space. 
 - It allows for **controllable** similarity search, where the user can tune exactly how much each aspect of the song should factor into their similarity search. This controllability personalizes the search to the user's unique notion of music similarity, and allows them to tune the search on a per-query basis. 
 
-See [[#Track and Artist Similarity]] for an explanation of how we compute the semantic similarity between two tracks using multiple aspect embeddings.
+See [Track and Artist Similarity](#track-and-artist-similarity) for an explanation of how we compute the semantic similarity between two tracks using multiple aspect embeddings.
 
 ### Artist-level Similarity
 In addition to computing the track-level similarity between a query track and candidate track, we compute the similarity between the *artists* of the respective tracks as well. The process for computing artist similarity is very similar to that of track similarity.
-- We first build structured profiles of each artist in our library using our same LLM with web search: each section follows the same descriptor-list format as track profiles (aside from genres - see [[#Prominence-weighted Artist Genres]] for more details).
+- We first build structured profiles of each artist in our library using our same LLM with web search: each section follows the same descriptor-list format as track profiles (aside from genres - see [Prominence-weighted Artist Genres](#prominence-weighted-artist-genres) for more details).
 - We then embed each profile aspect separately, and compute the final artist-level similarity as a weighted sum of the aspect-level similarity scores.
 
 We use only a single artist per track for artist-level similarity. If a track has multiple artists, we use the main artist as the artist for that track.
 
-We find that the combination of track and artist together provides a more complete representation and yields stronger similarity results than just the track alone. Examples of artist profiles can be found in [[#Example Artist Profiles]].
+We find that the combination of track and artist together provides a more complete representation and yields stronger similarity results than just the track alone. Examples of artist profiles can be found in [Example Artist Profiles](#example-artist-profiles).
 #### Prominence-weighted Artist Genres
 For the genres section of an artist profile, we found that using a simple list of genres led to a poor representation of the artist, due to each genre in the list having roughly equal weight in the embedding. While this works fine at the individual track level, a genre label applied to an artist is applied to their entire library of music. It's much more likely that some genres are *more* prominent in the artist's library, while others are *less* prominent.
 
-Therefore, we expand the genres section of the artist profile to be a list of *(genre, prominence)* pairs, where **prominence** is an integer from 1-10 indicating how prominent that genre is featured in the artist's library. We then individually embed each genre, and compute the genre similarity between two artists using a prominence-weighted cross-similarity between their genres (see [[#Artist Genres Similarity]]).
+Therefore, we expand the genres section of the artist profile to be a list of *(genre, prominence)* pairs, where **prominence** is an integer from 1-10 indicating how prominent that genre is featured in the artist's library. We then individually embed each genre, and compute the genre similarity between two artists using a prominence-weighted cross-similarity between their genres (see [Artist Genres Similarity](#artist-genres-similarity)).
 ### Model Selection and API Costs
 - **Web search model**: To search the internet and generate the track and artist profiles, we use Perplexity's Sonar Pro model (model name `sonar-pro` in the Perplexity API).
 - **Embedding model**: To embed the text profiles and text queries, we use OpenAI's `text-embedding-3-large` model (embedding size $d = 3072$). 
@@ -166,7 +157,7 @@ Therefore, we expand the genres section of the artist profile to be a list of *(
 | Embedding ($ / 100 artists)  | $0.008    |
 | Total ($ / 100 artists)      | **$2.27** |
 
-A more detailed breakdown of the API costs for generating and embedding the track and artist profiles is given in [[#Detailed Cost breakdown]]. 
+A more detailed breakdown of the API costs for generating and embedding the track and artist profiles is given in [Detailed Cost Breakdown](#detailed-cost-breakdown).
 
 ## Retrieval and Ranking
 
@@ -185,40 +176,40 @@ First, some definitions to make the scoring function more interpretable.
 
 ### Scoring Function for Song-to-song Search
 We score a candidate track $c$ against a query track $q$, with $c, q \in L$, using the below function:
-$\text{score}(q,c) = w_0 \cdot \text{track\_sim}(q, c) + w_1 \cdot \text{artist\_sim}(q, c) + w_2 \cdot \text{era\_sim}(q, c) + w_3 \cdot \text{life\_pop}(c) + w_4 \cdot \text{curr\_pop}(c)$
+$\text{score}(q,c) = w_0 \cdot \text{track_sim}(q, c) + w_1 \cdot \text{artist_sim}(q, c) + w_2 \cdot \text{era_sim}(q, c) + w_3 \cdot \text{life_pop}(c) + w_4 \cdot \text{curr_pop}(c)$
 where
 
-$$
+{{< math >}}
 \begin{aligned}
-\text{track\_sim}(q, c)
+\text{track_sim}(q, c)
   &= \sum_{i \in T} \alpha_i \cdot \text{cos}(\textbf{e}_i(q), \textbf{e}_i(c)) \\[8pt]
-\text{artist\_sim}(q, c)
-  &= \beta_{\text{genres}} \cdot \text{genres\_sim}(a_q, a_c) + \sum_{\substack{i \in A,\\ i \neq \text{genres}}} \beta_i \cdot \text{cos}(\textbf{e}_i(a_q), \textbf{e}_i(a_c)) \\[8pt]
-\text{era\_sim}(q, c)
+\text{artist_sim}(q, c)
+  &= \beta_{\text{genres}} \cdot \text{genres_sim}(a_q, a_c) + \sum_{\substack{i \in A,\\ i \neq \text{genres}}} \beta_i \cdot \text{cos}(\textbf{e}_i(a_q), \textbf{e}_i(a_c)) \\[8pt]
+\text{era_sim}(q, c)
   &= \exp{\left( \frac{-|r(q) - r(c)|}{\gamma} \right)} \\[8pt]
-\text{life\_pop}(c)
+\text{life_pop}(c)
   &= \frac{s_{T}(c)}{s_{T}(c) + K_{T}} \\[8pt]
-\text{curr\_pop}(c)
+\text{curr_pop}(c)
   &= \frac{s_{D}(c)}{s_{D}(c) + K_{D}} \\[8pt]
 \sum_{i=0}^4 w_i &= \sum_{i \in T} \alpha_i = \sum_{i \in A} \beta_i = 1 \\[8pt]
-
 \end{aligned}
+{{< /math >}}
 
-$$
 and
-$$
-\begin{aligned}
-\text{genres\_sim}(a_q, a_c) 
-	&= \frac{\text{cross\_sim}(G(a_q), G(a_c))}{\displaystyle\sqrt{\text{cross\_sim}(G(a_q), G(a_q)) + \text{cross\_sim}(G(a_c), G(a_c))}} \\[8pt]
-\text{cross\_sim}(G(a), G(b)) &= \sum_{i \in G(a)}\sum_{j \in G(b)}p_i \cdot p_j \cdot \text{cos}(\textbf{e}(g_i), \textbf{e}(g_j)) \\[8pt]
 
+{{< math >}}
+\begin{aligned}
+\text{genres_sim}(a_q, a_c) 
+	&= \frac{\text{cross_sim}(G(a_q), G(a_c))}{\displaystyle\sqrt{\text{cross_sim}(G(a_q), G(a_q)) + \text{cross_sim}(G(a_c), G(a_c))}} \\[8pt]
+\text{cross_sim}(G(a), G(b)) &= \sum_{i \in G(a)}\sum_{j \in G(b)}p_i \cdot p_j \cdot \text{cos}(\textbf{e}(g_i), \textbf{e}(g_j)) \\[8pt]
 \end{aligned}
-$$
+{{< /math >}}
 
 Note that $\text{cos}$ is used here as the cosine similarity between two vectors:
-$$
+
+{{< math >}}
 \text{cos}(\textbf{e}_1, \textbf{e}_2) = \frac{\textbf{e}_1 \cdot \textbf{e}_2}{||\textbf{e}_1|| ||\textbf{e}_2||}
-$$
+{{< /math >}}
 $\gamma$, $K_T$, and $K_D$ are hyperparameters that are set once, while the weights $w_i$, $\alpha_i$, and $\beta_i$ are set to defaults but are tunable by the user.
 
 We apply this scoring formula to each candidate in our library. Once all the candidates are scored, we retrieve the top $k$ candidates by their final score and return them to the user. 
@@ -229,7 +220,7 @@ The formulation for text-to-song search is identical to that of song-to-song sea
 - The artist genres similarity is computed as a prominence-weighted sum of the genre similarities to the text query. Since there is only a single query embedding, no cross-similarity formulation is needed here.
 - The era similarity component is discarded from the final score computation, since the query is simply a string $s$ with no release date.
 
-To embed a new text query $s$, we use the same embedding model that we used to embed the track and artist profiles, to ensure the query embedding is in the same embedding space as the tracks and artists. A complete formulation of the scoring formula for text-to-song search is included in [[#Ranking for Text-to-song Search]]. 
+To embed a new text query $s$, we use the same embedding model that we used to embed the track and artist profiles, to ensure the query embedding is in the same embedding space as the tracks and artists. A complete formulation of the scoring formula for text-to-song search is included in [Ranking for Text-to-song Search](#ranking-for-text-to-song-search). 
 
 # Experiments
 
@@ -375,7 +366,7 @@ The codebase is available on [GitHub](https://github.com/yourusername/song-searc
 # Ranking Deep Dive: Breaking Down the Scoring Function
 Now that we've presented the complete formulation for scoring a candidate track, let's go through it one piece at a time to get a better understand of what each part is doing.
 #### Final Score
-$\text{score}(q,c) = w_0 \cdot \text{track\_sim}(q, c) + w_1 \cdot \text{artist\_sim}(q, c) + w_2 \cdot \text{era\_sim}(q, c) + w_3 \cdot \text{life\_pop}(c) + w_4 \cdot \text{curr\_pop}(c)$
+$\text{score}(q,c) = w_0 \cdot \text{track_sim}(q, c) + w_1 \cdot \text{artist_sim}(q, c) + w_2 \cdot \text{era_sim}(q, c) + w_3 \cdot \text{life_pop}(c) + w_4 \cdot \text{curr_pop}(c)$
 where $ \sum_{i=0}^4 w_i = 1$
 
 The final score is a weighted average of five components: 
@@ -388,26 +379,25 @@ The final score is a weighted average of five components:
 The weights $w_i$ in this average are tunable by the user to allow for controllable similarity search.
 #### Track and Artist Similarity
 
-$$
+{{< math >}}
 \begin{aligned}
-\text{track\_sim}(q, c)
+\text{track_sim}(q, c)
   &= \sum_{i \in T} \alpha_i \cdot \text{cos}(\textbf{e}_i(q), \textbf{e}_i(c)) \\[8pt]
-\text{artist\_sim}(q, c)
-  &= \beta_{\text{genres}} \cdot \text{genres\_sim}(a_q, a_c) + \sum_{\substack{i \in A,\\ i \neq \text{genres}}} \beta_i \cdot \text{cos}(\textbf{e}_i(a_q), \textbf{e}_i(a_c)) \\[8pt]
+\text{artist_sim}(q, c)
+  &= \beta_{\text{genres}} \cdot \text{genres_sim}(a_q, a_c) + \sum_{\substack{i \in A,\\ i \neq \text{genres}}} \beta_i \cdot \text{cos}(\textbf{e}_i(a_q), \textbf{e}_i(a_c)) \\[8pt]
 \end{aligned}
-
-$$
+{{< /math >}}
 
 where $\textbf{e}_i(t)$ is the embedding of track $t$'s profile for track aspect $i$ and $\textbf{e}_i(a_t)$ is the embedding of artist $a_t$'s profile for artist aspect $i$.
 
-Both track similarity and artist similarity are weighted averages of aspect similarities, where each aspect similarity is calculated as the cosine similarity between the two corresponding aspect embeddings (with the exception of artist genres - see [[#Artist Genres Similarity]]).
+Both track similarity and artist similarity are weighted averages of aspect similarities, where each aspect similarity is calculated as the cosine similarity between the two corresponding aspect embeddings (with the exception of artist genres - see [Artist Genres Similarity](#artist-genres-similarity)).
 
 Intuitively, given a query and candidate track, we're comparing them aspect-by-aspect, and then taking a weighted average of these aspect similarity scores. The weights in this average are also controllable by the user, allowing them to customize the search to the specific aspects they care about.
 
 #### Era Similarity
-$$
-\text{era\_sim}(q, c) = \exp{\left( \frac{-|r(q) - r(c)|}{\gamma} \right)}
-$$
+{{< math >}}
+\text{era_sim}(q, c) = \exp{\left( \frac{-|r(q) - r(c)|}{\gamma} \right)}
+{{< /math >}}
 
 Era similarity is based on the difference in time between the query and candidate's release dates, mapped to $[0, 1]$ via an exponential decay function with decay constant $\gamma$. The exponential decay function has the following properties:
 - Two tracks with the exact same release date get an era similarity score of 1.
@@ -415,14 +405,14 @@ Era similarity is based on the difference in time between the query and candidat
 In the production system, we set $\lambda = 10950$, equal to the number of days in 30 years. With this setting, two tracks that are released 3 decades apart would have an era similarity score of 0.37. 
 
 #### Popularity Bonuses
-$$
+{{< math >}}
 \begin{aligned}
-	\text{life\_pop}(c)
+	\text{life_pop}(c)
 	  &= \frac{s_{T}(c)}{s_{T}(c) + K_{T}} \\[8pt]
-	\text{curr\_pop}(c)
+	\text{curr_pop}(c)
 	  &= \frac{s_{D}(c)}{s_{D}(c) + K_{D}} \\[8pt]
 \end{aligned}
-$$
+{{< /math >}}
 The lifetime and current popularity bonuses are based on total and daily streams respectively, mapped to $[0, 1]$ via a saturating function with priors $K_T$ and $K_D$. This saturating function has the following properties:
 - A track with $K_T$ total streams will get a lifetime popularity bonus of 0.5. Similarly, a track with $K_D$ daily streams will get a current popularity bonus of 0.5. 
 - As a track's total or daily stream count increases, its respective popularity bonus approaches 1.0.
@@ -439,14 +429,13 @@ A powerful feature of these bonuses is that by setting the weights below zero, w
 
 #### Artist Genres Similarity
 
-$$
+{{< math >}}
 \begin{aligned}
-\text{genres\_sim}(a_q, a_c) 
-	&= \frac{\text{cross\_sim}(G(a_q), G(a_c))}{\displaystyle\sqrt{\text{cross\_sim}(G(a_q), G(a_q)) + \text{cross\_sim}(G(a_c), G(a_c))}} \\[8pt]
-\text{cross\_sim}(G(a), G(b)) &= \sum_{i \in G(a)}\sum_{j \in G(b)}p_i \cdot p_j \cdot \text{cos}(\textbf{e}(g_i), \textbf{e}(g_j)) \\[8pt]
-
+\text{genres_sim}(a_q, a_c) 
+	&= \frac{\text{cross_sim}(G(a_q), G(a_c))}{\displaystyle\sqrt{\text{cross_sim}(G(a_q), G(a_q)) + \text{cross_sim}(G(a_c), G(a_c))}} \\[8pt]
+\text{cross_sim}(G(a), G(b)) &= \sum_{i \in G(a)}\sum_{j \in G(b)}p_i \cdot p_j \cdot \text{cos}(\textbf{e}(g_i), \textbf{e}(g_j)) \\[8pt]
 \end{aligned}
-$$
+{{< /math >}}
 
 Unlike genre similarity between tracks, which is a single cosine similarity between genre embeddings, genre similarity for artists incorporates the *prominence* of each genre in the final similarity score. This requires separate embeddings for each individual genre and a more involved similarity computation.
 
@@ -457,15 +446,17 @@ One problem remains with this weighted cross-similarity: normalization. If we ju
 To address this, we normalize the cross-similarity between the two artists by the square root of the sum of their self-similarities. After applying this normalization, two artists with the exact same genre-prominence pairs will receive a genres similarity score of $1.0$. 
 
 #### Addressing Same-artist Bias
-For candidate tracks that have the same artist as the query track, we have $\text{artist\_sim}(q, c) = 1.0$. Since there is usually a sizeable gap between this perfect score and the highest $\text{artist\_sim}$ score between two *different* artists, this phenomenon inflates tracks by the same artist in the final ranking. Moreover, it is often the case in real-world use that the goal is to discover similar songs by *different* artists, rather than similar songs by the same artist, which is much easier to find.
+For candidate tracks that have the same artist as the query track, we have $\text{artist_sim}(q, c) = 1.0$. Since there is usually a sizeable gap between this perfect score and the highest $\text{artist_sim}$ score between two *different* artists, this phenomenon inflates tracks by the same artist in the final ranking. Moreover, it is often the case in real-world use that the goal is to discover similar songs by *different* artists, rather than similar songs by the same artist, which is much easier to find.
 
 To mitigate this same-artist bias in the production system, for candidate tracks that are by the query artist, we replace the perfect 1.0 score with the **95th percentile** artist similarity score, where the population is the set of similarity scores between the query artist and each candidate artist. 
 
 
 # Limitations
-The primary limitation of this method is its reliance on information about the track existing on the internet. For very new tracks or more obscure tracks, the profile generation model may be unable to acquire sufficient information to generate the profile. In this case, it will simply set the "familiar" field to False and the remaining fields to null in its response, to protect against hallucination (see [[#Ensuring data accuracy of track and artist profiles]]).
+The primary limitation of this method is its reliance on information about the track existing on the internet. For very new tracks or more obscure tracks, the profile generation model may be unable to acquire sufficient information to generate the profile. In this case, it will simply set the "familiar" field to False and the remaining fields to null in its response, to protect against hallucination (see [Ensuring Data Accuracy of Track and Artist Profiles](#ensuring-data-accuracy-of-track-and-artist-profiles)).
 
 One possible way to mitigate this issue in the future would be to rely more on the artist information for an unfamiliar track. It is much less likely for there to be insufficient information on the web about an artist than about a particular track. If the track is unfamiliar but we have a detailed profile of the artist, we can leverage that information as a prior for the track. 
+
+Another limitation of this method is that it likely won't work as well as audio-based retrieval systems if the user is looking for tracks that are highly acoustically similar to a certain track. While representing the track through text can capture higher-level sonic characteristics of the track, it won't be able to capture the audio features in fine granularity the way an audio-based representation can. Though if we assume that in most real-world use cases, users generally want to search based on higher-level notions of similarity such as mood and atmosphere, then our text-based method performs quite well. 
 
 
 # References
@@ -584,7 +575,7 @@ Total cost (generation + embedding) per 100 artists: $2.2708
 
 ### New notation
 - For string $s$, let $\textbf{e}(s) \in \mathbb{R}^d$ be the **embedding** of $s$
-### Notation (restated from [[#Notation]])
+### Notation (restated from [Notation](#notation))
 - Let $L$ be the set of **tracks** in our library
 - Let $T$ be the set of track **aspects** (genres, vocal style, lyrical meaning, etc.)
 - Let $A$ be the set of artist **aspects**
@@ -597,26 +588,23 @@ Total cost (generation + embedding) per 100 artists: $2.2708
 
 ### Scoring Function for Text-to-song Search
 We score a candidate track $c$ against a query string $s$ using the below function:
-$\text{score}(s,c) = w_0 \cdot \text{track\_sim}(s, c) + w_1 \cdot \text{artist\_sim}(s, c) + w_2 \cdot \text{life\_pop}(c) + w_3 \cdot \text{curr\_pop}(c)$
+$\text{score}(s,c) = w_0 \cdot \text{track_sim}(s, c) + w_1 \cdot \text{artist_sim}(s, c) + w_2 \cdot \text{life_pop}(c) + w_3 \cdot \text{curr_pop}(c)$
 where
-
-$$
+{{< math >}}
 \begin{aligned}
-\text{track\_sim}(s, c)
+\text{track_sim}(s, c)
   &= \sum_{i \in T} \alpha_i \cdot \text{cos}(\textbf{e}(s), \textbf{e}_i(c)) \\[8pt]
-\text{artist\_sim}(s, c)
+\text{artist_sim}(s, c)
   &= \beta_{\text{genres}} \cdot \frac{1}{\sum_{i \in G(a_c)} p_i} \sum_{i \in G(a_c)}p_i \cdot \text{cos}(\textbf{e}(s), \textbf{e}(g_i)) + \sum_{\substack{i \in A,\\ i \neq \text{genres}}} \beta_i \cdot \text{cos}(\textbf{e}_i(a_q), \textbf{e}_i(a_c)) \\[8pt]
-\text{life\_pop}(c)
+\text{life_pop}(c)
   &= \frac{s_{T}(c)}{s_{T}(c) + K_{T}} \\[8pt]
-\text{curr\_pop}(c)
+\text{curr_pop}(c)
   &= \frac{s_{D}(c)}{s_{D}(c) + K_{D}} \\[8pt]
 \sum_{i=0}^4 w_i &= \sum_{i \in T} \alpha_i = \sum_{i \in A} \beta_i = 1 \\[8pt]
-
 \end{aligned}
-$$
+{{< /math >}}
 
 
 $K_T$, and $K_D$ are hyperparameters that are set once, while the weights $w_i$, $\alpha_i$, and $\beta_i$ are set to defaults but are tunable by the user.
 
 We apply this scoring formula to each candidate in our library. Once all the candidates are scored, we retrieve the top $k$ candidates by their final score and return them to the user. 
-

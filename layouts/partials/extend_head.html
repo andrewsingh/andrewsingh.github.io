@@ -1,3 +1,5 @@
+<link rel="stylesheet" href="/css/custom.css">
+
 {{- if or .Params.math .Site.Params.math }}
 <script>
 MathJax = {
@@ -12,9 +14,10 @@ MathJax = {
   }
 };
 
-window.addEventListener('load', (event) => {
-  document.querySelectorAll("mjx-container").forEach(function(x){
-    x.parentElement.classList += 'has-jax'})
+window.addEventListener('load', () => {
+  document.querySelectorAll('mjx-container').forEach((el) => {
+    el.parentElement?.classList.add('has-jax');
+  });
 });
 </script>
 <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>

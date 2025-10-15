@@ -1,0 +1,2 @@
+{{- $content := trim .Inner "\n" -}}
+{{- printf "$$\n%s\n$$" $content | safeHTML -}}
