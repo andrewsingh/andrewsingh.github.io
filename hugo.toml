@@ -21,10 +21,6 @@ theme = "PaperMod"
     name = "linkedin"
     url = "https://www.linkedin.com/in/andrew-singh-ba9615133"
 
-  [[params.socialIcons]]
-    name = "rss"
-    url = "/index.xml"
-
   # Custom CSS
   [params.assets]
     customCSS = ["css/custom.css"]
@@ -36,7 +32,7 @@ theme = "PaperMod"
   ShowBreadCrumbs = true
   ShowCodeCopyButtons = true
   ShowWordCount = true
-  ShowRssButtonInSectionTermList = true
+  ShowRssButtonInSectionTermList = false
   UseHugoToc = true
   disableSpecial1stPost = false
   disableScrollToTop = false
@@ -55,7 +51,7 @@ theme = "PaperMod"
 
 # Outputs
 [outputs]
-  home = ["HTML", "RSS", "JSON"]
+  home = ["HTML", "JSON"]
 
 # Taxonomies
 [taxonomies]

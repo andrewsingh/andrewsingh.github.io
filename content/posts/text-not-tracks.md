@@ -44,7 +44,7 @@ This post presents a method for building a music similarity search engine purely
 
 The core idea of the method is building structured text profiles of tracks and artists, then creating dense representations of these profiles to power embedding-based similarity search. 
 
-This post also includes a head-to-head evaluation against the current state of the art audio-text model, CLaMP 3 ([Wu et al. 2025](https://arxiv.org/abs/2502.10362)), on a limited library of music for which we have access to the original audio. Our method achieves a **72% win-rate** and a 64.5% confidence-weighted win rate against CLaMP 3, *without using any audio content or user streaming data*.
+This post also includes a preliminary head-to-head evaluation against a current state of the art audio-text model, CLaMP 3 ([Wu et al. 2025](https://arxiv.org/abs/2502.10362)), on a small-scale evaluation set. Our method achieves a 72% win-rate and a 64.5% confidence-weighted win rate against CLaMP 3, *without using any audio content or user streaming data*.
 
 In addition, this post presents [Song Search Arena](https://github.com/andrewsingh/song-search-arena/tree/main), a lightweight web app to facilitate conducting blinded, pairwise preference evaluations between music retrieval systems. The arena is model-agnostic, supports both song queries and text queries, and automatically computes analysis metrics such as win rates and Wilson Confidence Intervals.
   
@@ -222,9 +222,9 @@ The formulation for text-to-song search is identical to that of song-to-song sea
 
 To embed a new text query $s$, we use the same embedding model that we used to embed the track and artist profiles, to ensure the query embedding is in the same embedding space as the tracks and artists. A complete formulation of the scoring formula for text-to-song search is included in [Ranking for Text-to-song Search](#ranking-for-text-to-song-search). 
 
-# Experiments
+# Preliminary Evaluation
 
-In this section, we evaluate how our purely **text-based** music retrieval system performs against the current state-of-the-art **audio-based** music retrieval system, using a limited private library of music for which we do have access to the original audio. We directly compare our method against CLaMP 3, a multimodal audio-text model that is the current state-of-the-art in multimodal music retrieval, in an arena-style blind evaluation. 
+This section presents a preliminary evaluation of our **text-based** music retrieval system against a state-of-the-art **audio-text** music retrieval model, CLaMP 3. We directly compare our method against CLaMP 3 in an arena-style blind evaluation, over a private library of music for which we do have access to the original audio. Note that because this evaluation was over a small-scale eval set (36 total queries) due to time constraints and number of raters, this is only a preliminary study - a larger-scale study with a more diverse set of queries and more preference judgments will follow soon. 
 
 **Important Note**: since CLaMP 3 only uses the raw audio of the track as input, to maintain a fair evaluation, we limit our similarity search to using **only track and artist profiles** - no additional metadata. This means that our scoring function for this study only uses the track similarity and artist similarity components. This will allow us to directly compare the **representations** of the tracks in our library (text-based vs. audio-based), without additional components affecting the results. 
 ## Experimental Setup
@@ -282,6 +282,20 @@ Raters use an integrated Spotify playback interface to audition tracks directly 
 "beach club party"
 "emotional heartbreak ballad"
 ```
+The complete eval set is included in [Complete Evaluation Set](#complete-evaluation-set).
+
+#### Potential Sources of Bias
+The song queries were chosen to be well-known songs that were representative of the 3 major genres in our library: pop, hip-hop, and EDM. The text queries were written by us to cover a variety of genres and musical aspects. Note that while we did not explicitly select queries that our model performs well on, we acknowledge there may be some unintended bias in the query creation process. We plan to conduct a future study that eliminates any possible query creation bias by asking raters to **write their own queries** in addition to judging the results.
+
+#### Collected Judgments Details
+|                    |     |
+| ------------------------ | ---- |
+| Raters                   | 8    |
+| Total judgments          | 122  |
+| Total queries            | 36   |
+| Mean judgments per query | 3.39 |
+| Min judgments per query  | 3    |
+| Max judgments per query  | 5    |
 
 ### Analysis Methodology
 
@@ -317,11 +331,11 @@ Additionally, we compute **confidence-weighted** results where votes are weighte
 
 Our text-based music similarity search achieves a 72% standard win rate and 64.5% confidence-weighted win rate against CLaMP 3 on the music retrieval task, with a 30.5% and 13.9% tie rate respectively. This means that in the standard voting framework, our method is expected to win against CLaMP 3 50% of the time, lose 19% of the time, and tie 31% of the time. While in the confidence-weighted framework, our method is expected to win 55% of the time, lose 31% of the time, and tie 14% of the time.
 
-Note that this is a preliminary study due to limitations of library size and number of raters. Future experiments will increase the size and diversity of the library and evaluation set, as well as include ablations of our text-based method to evaluate the effect of specific design decisions such as descriptor-based profiles and prominence-weighted artist genres. 
+Note that this is a preliminary study due to the small eval set size and number of raters. Future experiments will increase the size and diversity of the evaluation set, as well as have raters write their own queries in addition to judging the results in order to eliminate any potential query creation bias that may be present in the eval set.
 
 # Song Search Arena
 
-To facilitate rigorous evaluation of music retrieval systems, we developed and open-sourced **Song Search Arena**, a lightweight web application for conducting blinded, pairwise preference evaluations. The tool is **model-agnostic** and can be used to compare any music retrieval systems, whether they're based on embeddings, symbolic features, hybrid approaches, or collaborative filtering.
+To facilitate rigorous evaluation of music retrieval systems, we develop and open-source **Song Search Arena**, a lightweight web application for conducting blinded, pairwise preference evaluations. The tool is **model-agnostic** and can be used to compare any music retrieval systems, whether they're based on embeddings, symbolic features, hybrid approaches, or collaborative filtering.
 ### How It Works
 Song Search Arena takes two simple inputs following standardized schemas:
 
@@ -361,12 +375,13 @@ The arena handles everything else: applying uniform post-processing policies, ma
 - **Admin Panel**: Password-protected page for the admin to upload queries and system responses, view progress per task, and download judgments in CSV or JSON for downstream analysis
 - **Analysis Script**: Script that takes in the downloaded judgments as input and computes head-to-head win rates along with statistical tests. 
 
-The codebase is available on [GitHub](https://github.com/yourusername/song-search-arena) for anyone looking to run their own music retrieval evaluations.
+The codebase is available on [GitHub](https://github.com/andrewsingh/song-search-arena) for anyone looking to run their own music retrieval evaluations.
 
 # Ranking Deep Dive: Breaking Down the Scoring Function
 Now that we've presented the complete formulation for scoring a candidate track, let's go through it one piece at a time to get a better understand of what each part is doing.
 #### Final Score
 $\text{score}(q,c) = w_0 \cdot \text{track_sim}(q, c) + w_1 \cdot \text{artist_sim}(q, c) + w_2 \cdot \text{era_sim}(q, c) + w_3 \cdot \text{life_pop}(c) + w_4 \cdot \text{curr_pop}(c)$
+
 where $ \sum_{i=0}^4 w_i = 1$
 
 The final score is a weighted average of five components: 
@@ -507,9 +522,8 @@ To mitigate hallucination and ensure accuracy of the LLM outputs, we add an expl
 After both medium and high search context passes, only 26 / 6189 songs in our initial library remained unfamiliar, a 99.6% success rate. Note that our initial library is primarily composed of English pop music, so the success rate is likely higher than for more varied or multilingual libraries.
 
 ### Descriptor lists instead of prose
-A key design decision was to have the content of each aspect be lists of descriptors (descriptive words or short phrases), rather than written prose:
+A key design decision was to have the content of each aspect be lists of descriptors (descriptive words or short phrases), rather than written prose. See the example below, for the song *Rolling in the Deep* by Adele:
 
-Track: Rolling in the Deep - Adele
 Mood & atmosphere (Prose): 
 ```
 "The overall atmosphere is intense, cathartic, and empowering, saturated with feelings of heartbreak, anger, and defiance. There is a palpable sense of emotional release as Adele transforms her pain into strength, inviting listeners to share in both her sorrow and her resolve. The song's energy is simultaneously uplifting and heavy, with an undercurrent of melancholy that gives way to triumphant self-assertion. It inspires a sense of solidarity with anyone who has experienced betrayal, offering a cathartic outlet for strong emotions."
@@ -519,7 +533,7 @@ Mood & atmosphere (Descriptors):
 ["fiercely triumphant", "fiery defiance", "cathartic heartbreak", "vulnerable-yet-empowered", "restless determination", "stormy intensity", "righteously wounded", "stirring confidence", "tension-to-release dynamic", "drama-charged energy"]
 ```
 
- While our initial version used several sentences of prose for each aspect, we discovered that descriptor lists, while less readable to humans, were better suited as inputs to embedding models and provided more accurate representations for similarity search. We posit this is likely due to the higher **information density** of descriptor lists, whereas prose contains more "filler" that, while enhancing readability for humans, pollutes the embedding representation and adds more noise to the similarity search.
+ While our initial version used several sentences of prose for each aspect, we discovered that descriptor lists, while less readable to humans, were better suited as inputs to embedding models and provided more accurate representations for similarity search. We posit this is likely due to the higher *information density* of descriptor lists compared to prose. Prose contains more "filler" that, while enhancing readability for humans, pollutes the embedding representation of the song and adds more noise to the similarity search. We plan to do a future ablation study to quantify the improvement that descriptor lists bring to the search results.
 
 
 ### Detailed Cost Breakdown
@@ -608,3 +622,68 @@ where
 $K_T$, and $K_D$ are hyperparameters that are set once, while the weights $w_i$, $\alpha_i$, and $\beta_i$ are set to defaults but are tunable by the user.
 
 We apply this scoring formula to each candidate in our library. Once all the candidates are scored, we retrieve the top $k$ candidates by their final score and return them to the user. 
+
+
+## Complete Evaluation Set
+#### Song queries
+```
+Pop
+--------
+Espresso - Sabrina Carpenter
+lovely (with Khalid) - Billie Eilish
+Disturbia - Rihanna
+Young And Beautiful - Lana Del Rey
+Kiss Me More (feat. SZA) - Doja Cat
+Circles - Post Malone
+Watermelon Sugar - Harry Styles
+I'm Not The Only One - Sam Smith
+back to friends - sombr
+
+Hip-hop
+--------
+HUMBLE. - Kendrick Lamar
+Up - Cardi B
+Mask Off - Future
+California Love - Original Version - 2Pac
+Lucid Dreams - Juice WRLD
+
+EDM
+--------
+Where You Are - John Summit
+A Moment Apart - ODESZA
+The Nights - Avicii
+Losing It - FISHER
+```
+
+#### Text queries
+```
+Pop
+--------
+playful carefree summery pop
+melancholic introspective pop
+motivational inspirational uplifting pop
+groovy laid-back indie pop
+
+Hip-hop
+--------
+dark intense gritty hip-hop
+motivational inspirational workout rap
+chill melodic hip-hop
+jazzy playful rap
+
+EDM
+--------
+laid-back chill EDM
+fun summertime dance electronic
+feel-good uplifting house music
+reflective late-night electronic
+
+Any
+--------
+pre-game hype playlist
+beach club party
+emotional heartbreak ballad
+playful quirky lighthearted lyrics
+soft piano songs
+acoustic guitar songs
+```
