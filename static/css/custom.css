@@ -2,42 +2,54 @@
 
 /* Reduce post content font size */
 .post-content {
-    font-size: 16px;
+    font-size: 14px;
 }
 
 /* Reduce heading sizes */
 .post-content h1 {
-    font-size: 1.8rem;
+    font-size: 1.6rem;
 }
 
 .post-content h2 {
-    font-size: 1.5rem;
-}
-
-.post-content h3 {
     font-size: 1.3rem;
 }
 
-.post-content h4 {
-    font-size: 1.1rem;
+.post-content h3 {
+    font-size: 1.15rem;
 }
 
-.post-content h5 {
+.post-content h4 {
     font-size: 1rem;
 }
 
-.post-content h6 {
+.post-content h5 {
     font-size: 0.9rem;
+}
+
+.post-content h6 {
+    font-size: 0.85rem;
 }
 
 /* Reduce paragraph and list text */
 .post-content p,
 .post-content li {
-    font-size: 16px;
+    font-size: 14px;
 }
 
 /* Reduce code block font size */
 .post-content pre,
 .post-content code {
-    font-size: 14px;
+    font-size: 13px;
+}
+
+/* Make code blocks wrap instead of scroll */
+.post-content pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-x: visible;
+}
+
+.post-content pre code {
+    white-space: pre-wrap;
+    word-wrap: break-word;
 }
