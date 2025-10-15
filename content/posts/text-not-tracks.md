@@ -458,7 +458,7 @@ We compute the overall genres similarity between two artists $a$ and $b$ as a **
 
 One problem remains with this weighted cross-similarity: normalization. If we just normalize the cross-similarity by the sum of all the weights $p_ip_j$, then two artists with the exact same genres will have a score $< 1.0$ due to $\text{cos}(\textbf{e}(g_i), \textbf{e}(g_j)) < 1.0$ for all $g_i \neq g_j$. This means that comparing an artist to themselves, unless they only have a single genre, would result in a score $< 1.0$. 
 
-To address this, we normalize the cross-similarity between the two artists by the square root of the sum of their *self-similarities*. After applying this normalization, two artists with the exact same genre-prominence pairs will receive a genres similarity score of $1.0$. 
+To address this, we normalize the cross-similarity between two artists by the square root of the sum of their *self-similarities*. After applying this normalization, two artists with the exact same genre-prominence pairs will receive a genres similarity score of $1.0$. 
 
 #### Addressing Same-artist Bias
 For candidate tracks that have the same artist as the query track, we have $\text{artist_sim}(q, c) = 1.0$. Since there is usually a sizeable gap between this perfect score and the highest $\text{artist_sim}$ score between two *different* artists, this phenomenon inflates tracks by the same artist in the final ranking. Moreover, it is often the case in real-world use that the goal is to discover similar songs by *different* artists, rather than similar songs by the same artist, which is much easier to find.
