@@ -81,7 +81,7 @@ Given this track metadata as input, our goal is to obtain rich semantic represen
 Instead of the original audio content, which we don't have access to, we use a large language model with web search to generate a **descriptive text profile** of the track. We then send each part of this profile through a text embedding model to obtain a dense representation of the profile that we can use for similarity search. 
 
 
-![Metadata to embeddings pipeline](/assets/text-not-tracks/metadata_to_embeddings.excalidraw.svg){: width="1200" }
+![Metadata to embeddings pipeline](/assets/text-not-tracks/metadata_to_embeddings.svg){: width="1200" }
 
 ### Generating Text Profiles
  For each track in our library, we use an LLM with web search to generate a structured written profile of the track. Given the track name and artist names, the LLM is instructed to search the web for relevant information about the track, then use the information to create a 6-section profile of the track. The 6 sections are
