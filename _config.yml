@@ -3,21 +3,15 @@ tagline: "Personal blog for machine learning projects"
 description: "My blog for personal machine learning projects."
 url: "https://andrewsingh.github.io"
 
-# Theme
-remote_theme: cotes2020/jekyll-theme-chirpy
+# Theme - using gem instead of remote_theme
+theme: jekyll-theme-chirpy
 
-# Markdown + math
-markdown: kramdown
-kramdown:
-  math_engine: mathjax
-# RSS + SEO
-plugins:
-  - jekyll-remote-theme
-  - jekyll-feed
-  - jekyll-seo-tag
+# Timezone
+timezone: America/Los_Angeles
 
 # Navbar / social (Chirpy reads these)
 social:
-  github: andrewsingh
-  linkedin: andrew-singh-ba9615133
-  rss: true
+  name: Andrew Singh
+  links:
+    - https://github.com/andrewsingh
+    - https://www.linkedin.com/in/andrew-singh-ba9615133
