@@ -9,7 +9,7 @@ theme = "PaperMod"
 
   # Home info (displayed at top of homepage)
   [params.homeInfoParams]
-    Title = "👋 Welcome to Andrew's Blog"
+    Title = "👋 Welcome"
     Content = "Hi, I'm Andrew. I'm a machine learning engineer interested in natural language processing, information retrieval, and recommender systems."
 
   # Social icons
@@ -24,6 +24,10 @@ theme = "PaperMod"
   [[params.socialIcons]]
     name = "rss"
     url = "/index.xml"
+
+  # Custom CSS
+  [params.assets]
+    customCSS = ["css/custom.css"]
 
   # Features
   ShowReadingTime = true

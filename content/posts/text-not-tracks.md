@@ -15,13 +15,6 @@ ShowToc: true
 TocOpen: false
 ---
 
-<!-- mathjax for this post only -->
-<script>
-  window.MathJax = { tex: { inlineMath: [['\\(','\\)'], ['$', '$']], tags: 'ams' } };
-</script>
-<script async id="MathJax-script"
-  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-
 # Demo
 
 Try the search engine here: https://songmatch.up.railway.app
@@ -192,10 +185,10 @@ First, some definitions to make the scoring function more interpretable.
 
 ### Scoring Function for Song-to-song Search
 We score a candidate track $c$ against a query track $q$, with $c, q \in L$, using the below function:
-$\large\text{score}(q,c) = w_0 \cdot \text{track\_sim}(q, c) + w_1 \cdot \text{artist\_sim}(q, c) + w_2 \cdot \text{era\_sim}(q, c) + w_3 \cdot \text{life\_pop}(c) + w_4 \cdot \text{curr\_pop}(c)$
+$\text{score}(q,c) = w_0 \cdot \text{track\_sim}(q, c) + w_1 \cdot \text{artist\_sim}(q, c) + w_2 \cdot \text{era\_sim}(q, c) + w_3 \cdot \text{life\_pop}(c) + w_4 \cdot \text{curr\_pop}(c)$
 where
 
-$$\large
+$$
 \begin{aligned}
 \text{track\_sim}(q, c)
   &= \sum_{i \in T} \alpha_i \cdot \text{cos}(\textbf{e}_i(q), \textbf{e}_i(c)) \\[8pt]
@@ -213,7 +206,7 @@ $$\large
 
 $$
 and
-$$\large
+$$
 \begin{aligned}
 \text{genres\_sim}(a_q, a_c) 
 	&= \frac{\text{cross\_sim}(G(a_q), G(a_c))}{\displaystyle\sqrt{\text{cross\_sim}(G(a_q), G(a_q)) + \text{cross\_sim}(G(a_c), G(a_c))}} \\[8pt]
@@ -222,9 +215,9 @@ $$\large
 \end{aligned}
 $$
 
-Note that $\large\text{cos}$ is used here as the cosine similarity between two vectors:
+Note that $\text{cos}$ is used here as the cosine similarity between two vectors:
 $$
-\large\text{cos}(\textbf{e}_1, \textbf{e}_2) = \frac{\textbf{e}_1 \cdot \textbf{e}_2}{||\textbf{e}_1|| ||\textbf{e}_2||}
+\text{cos}(\textbf{e}_1, \textbf{e}_2) = \frac{\textbf{e}_1 \cdot \textbf{e}_2}{||\textbf{e}_1|| ||\textbf{e}_2||}
 $$
 $\gamma$, $K_T$, and $K_D$ are hyperparameters that are set once, while the weights $w_i$, $\alpha_i$, and $\beta_i$ are set to defaults but are tunable by the user.
 
@@ -382,8 +375,8 @@ The codebase is available on [GitHub](https://github.com/yourusername/song-searc
 # Ranking Deep Dive: Breaking Down the Scoring Function
 Now that we've presented the complete formulation for scoring a candidate track, let's go through it one piece at a time to get a better understand of what each part is doing.
 #### Final Score
-$\large\text{score}(q,c) = w_0 \cdot \text{track\_sim}(q, c) + w_1 \cdot \text{artist\_sim}(q, c) + w_2 \cdot \text{era\_sim}(q, c) + w_3 \cdot \text{life\_pop}(c) + w_4 \cdot \text{curr\_pop}(c)$
-where $\large \sum_{i=0}^4 w_i = 1$
+$\text{score}(q,c) = w_0 \cdot \text{track\_sim}(q, c) + w_1 \cdot \text{artist\_sim}(q, c) + w_2 \cdot \text{era\_sim}(q, c) + w_3 \cdot \text{life\_pop}(c) + w_4 \cdot \text{curr\_pop}(c)$
+where $ \sum_{i=0}^4 w_i = 1$
 
 The final score is a weighted average of five components: 
 1. Track similarity
@@ -395,7 +388,7 @@ The final score is a weighted average of five components:
 The weights $w_i$ in this average are tunable by the user to allow for controllable similarity search.
 #### Track and Artist Similarity
 
-$$\large
+$$
 \begin{aligned}
 \text{track\_sim}(q, c)
   &= \sum_{i \in T} \alpha_i \cdot \text{cos}(\textbf{e}_i(q), \textbf{e}_i(c)) \\[8pt]
@@ -412,7 +405,7 @@ Both track similarity and artist similarity are weighted averages of aspect simi
 Intuitively, given a query and candidate track, we're comparing them aspect-by-aspect, and then taking a weighted average of these aspect similarity scores. The weights in this average are also controllable by the user, allowing them to customize the search to the specific aspects they care about.
 
 #### Era Similarity
-$$\large
+$$
 \text{era\_sim}(q, c) = \exp{\left( \frac{-|r(q) - r(c)|}{\gamma} \right)}
 $$
 
@@ -422,7 +415,7 @@ Era similarity is based on the difference in time between the query and candidat
 In the production system, we set $\lambda = 10950$, equal to the number of days in 30 years. With this setting, two tracks that are released 3 decades apart would have an era similarity score of 0.37. 
 
 #### Popularity Bonuses
-$$\large
+$$
 \begin{aligned}
 	\text{life\_pop}(c)
 	  &= \frac{s_{T}(c)}{s_{T}(c) + K_{T}} \\[8pt]
@@ -446,7 +439,7 @@ A powerful feature of these bonuses is that by setting the weights below zero, w
 
 #### Artist Genres Similarity
 
-$$\large
+$$
 \begin{aligned}
 \text{genres\_sim}(a_q, a_c) 
 	&= \frac{\text{cross\_sim}(G(a_q), G(a_c))}{\displaystyle\sqrt{\text{cross\_sim}(G(a_q), G(a_q)) + \text{cross\_sim}(G(a_c), G(a_c))}} \\[8pt]
@@ -604,10 +597,10 @@ Total cost (generation + embedding) per 100 artists: $2.2708
 
 ### Scoring Function for Text-to-song Search
 We score a candidate track $c$ against a query string $s$ using the below function:
-$\large\text{score}(s,c) = w_0 \cdot \text{track\_sim}(s, c) + w_1 \cdot \text{artist\_sim}(s, c) + w_2 \cdot \text{life\_pop}(c) + w_3 \cdot \text{curr\_pop}(c)$
+$\text{score}(s,c) = w_0 \cdot \text{track\_sim}(s, c) + w_1 \cdot \text{artist\_sim}(s, c) + w_2 \cdot \text{life\_pop}(c) + w_3 \cdot \text{curr\_pop}(c)$
 where
 
-$$\large
+$$
 \begin{aligned}
 \text{track\_sim}(s, c)
   &= \sum_{i \in T} \alpha_i \cdot \text{cos}(\textbf{e}(s), \textbf{e}_i(c)) \\[8pt]
@@ -620,7 +613,6 @@ $$\large
 \sum_{i=0}^4 w_i &= \sum_{i \in T} \alpha_i = \sum_{i \in A} \beta_i = 1 \\[8pt]
 
 \end{aligned}
-
 $$
 
 

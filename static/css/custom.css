@@ -1,0 +1,43 @@
+/* Custom font size overrides */
+
+/* Reduce post content font size */
+.post-content {
+    font-size: 16px;
+}
+
+/* Reduce heading sizes */
+.post-content h1 {
+    font-size: 1.8rem;
+}
+
+.post-content h2 {
+    font-size: 1.5rem;
+}
+
+.post-content h3 {
+    font-size: 1.3rem;
+}
+
+.post-content h4 {
+    font-size: 1.1rem;
+}
+
+.post-content h5 {
+    font-size: 1rem;
+}
+
+.post-content h6 {
+    font-size: 0.9rem;
+}
+
+/* Reduce paragraph and list text */
+.post-content p,
+.post-content li {
+    font-size: 16px;
+}
+
+/* Reduce code block font size */
+.post-content pre,
+.post-content code {
+    font-size: 14px;
+}
