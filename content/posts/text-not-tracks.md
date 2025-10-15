@@ -3,6 +3,7 @@ title: "Text, Not Tracks: Building Music Similarity Search Without Audio or User
 date: 2025-10-14T00:00:00-08:00
 draft: false
 math: true
+ShowReadingTime: true
 ShowToc: true
 TocOpen: false
 ---
