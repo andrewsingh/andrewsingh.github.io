@@ -416,8 +416,8 @@ Intuitively, given a query and candidate track, we're comparing them aspect-by-a
 
 Era similarity is based on the difference in time between the query and candidate's release dates, mapped to $[0, 1]$ via an exponential decay function with decay constant $\gamma$. The exponential decay function has the following properties:
 - Two tracks with the exact same release date get an era similarity score of 1.
-- As the time difference between their release dates increase, their era similarity score decays towards 0, with the rate of decay controlled by the the decay constant $\lambda$.
-In the production system, we set $\lambda = 10950$, equal to the number of days in 30 years. With this setting, two tracks that are released 3 decades apart would have an era similarity score of 0.37. 
+- As the time difference between their release dates increase, their era similarity score decays towards 0, with the rate of decay controlled by the the decay constant $\gamma$.
+In the production system, we set $\gamma = 10950$, equal to the number of days in 30 years. With this setting, two tracks that are released 3 decades apart would have an era similarity score of 0.37. 
 
 #### Popularity Bonuses
 {{< math >}}
