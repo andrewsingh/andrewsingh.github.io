@@ -1,9 +1,18 @@
 ---
-layout: post
 title: "Text, Not Tracks: Building Music Similarity Search Without Audio or User Data"
-date: 2025-10-14 00:00:00 -0800
-categories: [Machine Learning, Information Retrieval]
-tags: [llm, embeddings, recsys, search]
+date: 2025-10-14T00:00:00-08:00
+draft: false
+categories:
+  - Machine Learning
+  - Information Retrieval
+tags:
+  - llm
+  - embeddings
+  - recsys
+  - search
+math: true
+ShowToc: true
+TocOpen: false
 ---
 
 <!-- mathjax for this post only -->
@@ -12,8 +21,6 @@ tags: [llm, embeddings, recsys, search]
 </script>
 <script async id="MathJax-script"
   src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-
-# Text, Not Tracks: Building Music Similarity Search Without Audio or User Data
 
 # Demo
 

@@ -1,13 +1,8 @@
-# Jekyll
-_site/
-.sass-cache/
-.jekyll-cache/
-.jekyll-metadata
-.bundle/
-
-# Ruby
-Gemfile.lock
-vendor/
+# Hugo
+public/
+resources/
+.hugo_build.lock
+themes/
 
 # macOS
 .DS_Store
