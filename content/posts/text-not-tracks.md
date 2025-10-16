@@ -158,7 +158,7 @@ Therefore, we expand the genres section of the artist profile to be a list of *(
 | Embedding ($ / 100 artists)  | $0.008    |
 | Total ($ / 100 artists)      | **$2.27** |
 
-A more detailed breakdown of the API cost for generating and embedding track and artist profiles is given in [Detailed Cost Breakdown](#detailed-cost-breakdown).
+A more detailed breakdown of the API costs for generating and embedding track and artist profiles is given in [Detailed Cost Breakdown](#detailed-cost-breakdown).
 
 ## Retrieval and Ranking
 
@@ -225,7 +225,7 @@ The formulation for text-to-song search is identical to that of song-to-song sea
 - The artist genres similarity is computed as a prominence-weighted sum of the genre similarities to the text query. Since there is only a single query embedding, no cross-similarity formulation is needed here.
 - The era similarity component is discarded from the final score computation, since the query is simply a string $s$ with no release date.
 
-To embed a new text query $s$, we use the same embedding model that we used to embed the track and artist profiles, to ensure the query embedding is in the same embedding space as the tracks and artists. A complete formulation of the scoring formula for text-to-song search is included in [Ranking for Text-to-song Search](#ranking-for-text-to-song-search). 
+To embed a new text query $s$, we use the **same embedding model** that we use to embed the track and artist profiles, to ensure that the query embedding is in the same embedding space as the tracks and artists. A complete definition of the scoring function for text-to-song search is included in [Ranking for Text-to-song Search](#ranking-for-text-to-song-search). 
 
 # Preliminary Evaluation
 
@@ -320,14 +320,14 @@ Additionally, we compute **confidence-weighted** results where votes are weighte
 
 #### Standard
 
-| Query type | System A | System B | Win Rate (System A) | 95% CI Lower | 95% CI Upper | Tie Rate |
+| Query Type | System A | System B | Win Rate (System A) | 95% CI Lower | 95% CI Upper | Tie Rate |
 | ---------- | -------- | -------- | ------------------- | ------------ | ------------ | -------- |
 | all        | ours     | CLaMP 3  | **72.00%**          | 52.42%       | 85.72%       | 30.56%   |
 | song       | ours     | CLaMP 3  | 71.43%              | 43.44%       | 90.25%       | 38.89%   |
 | text       | ours     | CLaMP 3  | 72.73%              | 45.35%       | 88.28%       | 22.22%   |
 
 #### Confidence-weighted
-| Query type | System A | System B | Win Rate (System A) | 95% CI Lower | 95% CI Upper | Tie Rate |
+| Query Type | System A | System B | Win Rate (System A) | 95% CI Lower | 95% CI Upper | Tie Rate |
 | ---------- | -------- | -------- | ------------------- | ------------ | ------------ | -------- |
 | all        | ours     | CLaMP 3  | **64.52%**          | 46.95%       | 78.88%       | 13.89%   |
 | song       | ours     | CLaMP 3  | 68.75%              | 44.40%       | 85.84%       | 16.67%   |
