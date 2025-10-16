@@ -180,7 +180,7 @@ We score a candidate track $c$ against a query track $q$, with $c, q \in L$, usi
 
 {{< math >}}
 \text{score}(q,c) = w_0 \cdot \text{track_sim}(q, c) + w_1 \cdot \text{artist_sim}(q, c) + w_2 \cdot \text{era_sim}(q, c) + w_3 \cdot \text{life_pop}(c) + w_4 \cdot \text{curr_pop}(c)
-{{< math >}}
+{{< /math >}}
 
 where
 
