@@ -40,7 +40,7 @@ It turns out that being constrained to represent songs through text instead of t
 
 ### What’s Inside
 This post presents a method for building a music similarity search engine purely from internet text data. The search engine performs two types of search tasks:
-1. **Song-to-song** search, where the query is a song and the goal is to retrieve the most similar songs to the query song
+1. **Song-to-song** search, where the query is a song and the goal is to retrieve the most similar songs to the query song.
 2. **Text-to-song** search, where the query is a text string and the goal is to retrieve the songs that best match the text query.
 
 The core idea of the method is building structured text profiles of tracks and artists, then creating dense representations of these profiles to power embedding-based similarity search. 
@@ -139,26 +139,26 @@ We use only a single artist per track for artist-level similarity. If a track ha
 
 We find that the combination of track and artist together provides a more complete representation and yields stronger similarity results than just the track alone. Examples of artist profiles can be found in [Example Artist Profiles](#example-artist-profiles).
 #### Prominence-weighted Artist Genres
-For the genres section of an artist profile, we found that using a simple list of genres led to a poor representation of the artist, due to each genre in the list having roughly equal weight in the embedding. While this works fine at the individual track level, a genre label applied to an artist is applied to their entire library of music. It's much more likely that some genres are *more* prominent in the artist's library, while others are *less* prominent.
+For the genres section of an artist profile, we found that using a simple list of genres led to a poor representation of the artist, due to each genre in the list having roughly equal weight in the embedding. While this works fine at the individual track level, a genre label applied to an artist is applied to their entire library of music. It's much more likely that some genres are more prominent in the artist's library, while others are less prominent.
 
 Therefore, we expand the genres section of the artist profile to be a list of *(genre, prominence)* pairs, where **prominence** is an integer from 1-10 indicating how prominent that genre is featured in the artist's library. We then individually embed each genre, and compute the genre similarity between two artists using a prominence-weighted cross-similarity between their genres (see [Artist Genres Similarity](#artist-genres-similarity)).
 ### Model Selection and API Costs
 - **Web search model**: To search the internet and generate the track and artist profiles, we use Perplexity's Sonar Pro model (model name `sonar-pro` in the Perplexity API).
 - **Embedding model**: To embed the text profiles and text queries, we use OpenAI's `text-embedding-3-large` model (embedding size $d = 3072$). 
 
-| Track Profiles               |            |
+| Track Profile Cost               |            |
 | ---------------------------- | ---------- |
 | Generation ($ / 1000 tracks) | $17.97     |
 | Embedding ($ / 1000 tracks)  | $0.044     |
 | Total ($ / 1000 tracks)      | **$18.01** |
 
-| Artist Profiles              |           |
+| Artist Profile Cost              |           |
 | ---------------------------- | --------- |
 | Generation ($ / 100 artists) | $2.26     |
 | Embedding ($ / 100 artists)  | $0.008    |
 | Total ($ / 100 artists)      | **$2.27** |
 
-A more detailed breakdown of the API costs for generating and embedding the track and artist profiles is given in [Detailed Cost Breakdown](#detailed-cost-breakdown).
+A more detailed breakdown of the API cost for generating and embedding track and artist profiles is given in [Detailed Cost Breakdown](#detailed-cost-breakdown).
 
 ## Retrieval and Ranking
 
@@ -177,7 +177,11 @@ First, some definitions to make the scoring function more interpretable.
 
 ### Scoring Function for Song-to-song Search
 We score a candidate track $c$ against a query track $q$, with $c, q \in L$, using the below function:
-$\text{score}(q,c) = w_0 \cdot \text{track_sim}(q, c) + w_1 \cdot \text{artist_sim}(q, c) + w_2 \cdot \text{era_sim}(q, c) + w_3 \cdot \text{life_pop}(c) + w_4 \cdot \text{curr_pop}(c)$
+
+{{< math >}}
+\text{score}(q,c) = w_0 \cdot \text{track_sim}(q, c) + w_1 \cdot \text{artist_sim}(q, c) + w_2 \cdot \text{era_sim}(q, c) + w_3 \cdot \text{life_pop}(c) + w_4 \cdot \text{curr_pop}(c)
+{{< math >}}
+
 where
 
 {{< math >}}
